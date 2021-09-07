@@ -1,0 +1,14 @@
+# action.yml
+# Maintainer: https://www.likexian.com
+# Licensed under the Apache License 2.0
+
+name: 'Go Release Action'
+description: 'Automate publishing Go build binary artifacts to GitHub releases through GitHub Actions.'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+
+branding:
+  icon: 'package'
+  color: 'blue'
