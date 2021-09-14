@@ -4,7 +4,7 @@
 # Maintainer: https://www.likexian.com
 # Licensed under the Apache License 2.0
 
-set -eux
+set -ex
 
 TAG_NAME=$(jq -r .release.tag_name $GITHUB_EVENT_PATH)
 UPLOAD_URL=$(jq -r .release.upload_url $GITHUB_EVENT_PATH)
@@ -14,7 +14,12 @@ if [[ -n "${BUILD_DIR}" ]]; then
     cd ${BUILD_DIR}
 fi
 
-go build ${BUILD_FLAGS}
+LDFLAGS_KEY=""
+if [[ -n "${LDFLAGS}" ]]; then
+    LDFLAGS_KEY="-ldflags"
+fi
+
+go build ${BUILD_FLAGS} ${LDFLAGS_KEY} "${LDFLAGS}"
 
 if [[ -z "${BINARY_NAME}" ]]; then
     BINARY_NAME=$(basename ${GITHUB_REPOSITORY})

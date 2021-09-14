@@ -37,7 +37,8 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           BUILD_DIR: cmd/example
-          BUILD_FLAGS: "-v -ldflags '-w -s'"
+          BUILD_FLAGS: -v
+          LDFLAGS: -w -s
 ```
 
 ## License
