@@ -14,16 +14,29 @@ if [[ -n "${BUILD_DIR}" ]]; then
     cd ${BUILD_DIR}
 fi
 
+if [[ -z "${GOOS}" ]]; then
+    GOOS="linux"
+fi
+
+if [[ -z "${GOARCH}" ]]; then
+    GOARCH="amd64"
+fi
+
 LDFLAGS_KEY=""
 if [[ -n "${LDFLAGS}" ]]; then
     LDFLAGS_KEY="-ldflags"
 fi
 
-go build ${BUILD_FLAGS} ${LDFLAGS_KEY} "${LDFLAGS}"
-
 if [[ -z "${BINARY_NAME}" ]]; then
-    BINARY_NAME=$(basename ${GITHUB_REPOSITORY})
+    BINARY_NAME=$(basename $(pwd))
 fi
+
+BINARY_EXT=""
+if [ "${GOOS}" == "windows" ]; then
+    BINARY_EXT=".exe"
+fi
+
+GOOS=${GOOS} GOARCH=${GOARCH} go build ${BUILD_FLAGS} ${LDFLAGS_KEY} "${LDFLAGS}" -o ${BINARY_NAME}${BINARY_EXT}
 
 ZIP_NAME="${BINARY_NAME}-${TAG_NAME}-${GOOS}-${GOARCH}"
 
@@ -31,12 +44,12 @@ case "${GOOS}" in
     "windows")
         CONTENT_TYPE="zip"
         ZIP_NAME="${ZIP_NAME}.zip"
-        zip -9 -r ${ZIP_NAME} "${BINARY_NAME}.exe"
+        zip -9 -r ${ZIP_NAME} "${BINARY_NAME}${BINARY_EXT}"
         ;;
     *)
         CONTENT_TYPE="gzip"
         ZIP_NAME="${ZIP_NAME}.tar.gz"
-        zip -9 -r ${ZIP_NAME} "${BINARY_NAME}"
+        tar zcf ${ZIP_NAME} "${BINARY_NAME}${BINARY_EXT}"
         ;;
 esac
 
