@@ -65,4 +65,4 @@ curl --data-binary "@${ZIP_NAME}" \
 curl --data "${CHECKSUM}" \
     -H "Content-Type: text/plain" \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    "${UPLOAD_URL}?name=${ZIP_NAME}-checksum.txt"
+    "${UPLOAD_URL}?name=${ZIP_NAME}.sha256sum.txt"
