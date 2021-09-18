@@ -6,9 +6,8 @@
 
 set -ex
 
-TAG_NAME=$(jq -r .release.tag_name $GITHUB_EVENT_PATH)
-UPLOAD_URL=$(jq -r .release.upload_url $GITHUB_EVENT_PATH)
-UPLOAD_URL=${UPLOAD_URL/\{?name,label\}/}
+TAG_NAME=$(jq -r .release.tag_name $GITHUB_EVENT_PATH | sed -s 's/v//')
+UPLOAD_URL=$(jq -r .release.upload_url $GITHUB_EVENT_PATH | sed -s 's/{?name,label}//')
 
 if [[ -n "${BUILD_DIR}" ]]; then
     cd ${BUILD_DIR}
