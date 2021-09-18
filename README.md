@@ -39,6 +39,8 @@ jobs:
           BUILD_DIR: cmd/example
           BUILD_FLAGS: -v
           LDFLAGS: -w -s
+          BINARY_NAME: example
+          FILE_TAG: true
 ```
 
 ## License

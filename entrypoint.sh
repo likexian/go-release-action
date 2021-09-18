@@ -9,48 +9,48 @@ set -ex
 TAG_NAME=$(jq -r .release.tag_name $GITHUB_EVENT_PATH | sed -s 's/v//')
 UPLOAD_URL=$(jq -r .release.upload_url $GITHUB_EVENT_PATH | sed -s 's/{?name,label}//')
 
-if [[ -n "${BUILD_DIR}" ]]; then
-    cd ${BUILD_DIR}
+if [[ -n $BUILD_DIR ]]; then
+    cd $BUILD_DIR
 fi
 
-if [[ -z "${GOOS}" ]]; then
+if [[ -z $GOOS ]]; then
     GOOS="linux"
 fi
 
-if [[ -z "${GOARCH}" ]]; then
+if [[ -z $GOARCH ]]; then
     GOARCH="amd64"
 fi
 
 LDFLAGS_KEY=""
-if [[ -n "${LDFLAGS}" ]]; then
+if [[ -n $LDFLAGS ]]; then
     LDFLAGS_KEY="-ldflags"
 fi
 
-if [[ -z "${BINARY_NAME}" ]]; then
+if [[ -z $BINARY_NAME ]]; then
     BINARY_NAME=$(basename $(pwd))
 fi
 
 BINARY_EXT=""
-if [ "${GOOS}" == "windows" ]; then
+if [[ $GOOS == "windows" ]]; then
     BINARY_EXT=".exe"
+fi
+
+ZIP_NAME="${BINARY_NAME}-${GOOS}-${GOARCH}"
+if [[ $FILE_TAG == "true" ]]; then
+    ZIP_NAME="${BINARY_NAME}-${TAG_NAME}-${GOOS}-${GOARCH}"
 fi
 
 GOOS=${GOOS} GOARCH=${GOARCH} go build ${BUILD_FLAGS} ${LDFLAGS_KEY} "${LDFLAGS}" -o ${BINARY_NAME}${BINARY_EXT}
 
-ZIP_NAME="${BINARY_NAME}-${TAG_NAME}-${GOOS}-${GOARCH}"
-
-case "${GOOS}" in
-    "windows")
-        CONTENT_TYPE="zip"
-        ZIP_NAME="${ZIP_NAME}.zip"
-        zip -9 -r ${ZIP_NAME} "${BINARY_NAME}${BINARY_EXT}"
-        ;;
-    *)
-        CONTENT_TYPE="gzip"
-        ZIP_NAME="${ZIP_NAME}.tar.gz"
-        tar zcf ${ZIP_NAME} "${BINARY_NAME}${BINARY_EXT}"
-        ;;
-esac
+if [[ $GOOS == "windows" ]]; then
+    CONTENT_TYPE="zip"
+    ZIP_NAME="${ZIP_NAME}.zip"
+    zip -9 -r ${ZIP_NAME} "${BINARY_NAME}${BINARY_EXT}"
+else
+    CONTENT_TYPE="gzip"
+    ZIP_NAME="${ZIP_NAME}.tar.gz"
+    tar zcf ${ZIP_NAME} "${BINARY_NAME}${BINARY_EXT}"
+fi
 
 CHECKSUM=$(sha256sum ${ZIP_NAME} | awk '{print $1}')
 
