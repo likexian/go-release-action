@@ -21,11 +21,6 @@ if [[ -z $GOARCH ]]; then
     GOARCH="amd64"
 fi
 
-LDFLAGS_KEY=""
-if [[ -n $LDFLAGS ]]; then
-    LDFLAGS_KEY="-ldflags"
-fi
-
 if [[ -z $BINARY_NAME ]]; then
     BINARY_NAME=$(basename $(pwd))
 fi
@@ -40,7 +35,7 @@ if [[ $FILE_TAG == "true" ]]; then
     ZIP_NAME="${BINARY_NAME}-${TAG_NAME}-${GOOS}-${GOARCH}"
 fi
 
-GOOS=${GOOS} GOARCH=${GOARCH} go build ${BUILD_FLAGS} ${LDFLAGS_KEY} "${LDFLAGS}" -o ${BINARY_NAME}${BINARY_EXT}
+GOOS=${GOOS} GOARCH=${GOARCH} go build ${BUILD_FLAGS} -ldflags "${LDFLAGS}" -o ${BINARY_NAME}${BINARY_EXT}
 
 if [[ $GOOS == "windows" ]]; then
     CONTENT_TYPE="zip"
