@@ -6,6 +6,39 @@ Automate publishing Go build binary artifacts to GitHub releases through GitHub 
 
 ## Example
 
+### Basic Example
+
+Release single artifact for linux amd64 with default option.
+
+```yaml
+# .github/workflows/release.yaml
+# Maintainer: https://www.likexian.com
+# Licensed under the Apache License 2.0
+
+name: Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Release code
+        uses: likexian/go-release-action@v0.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOOS: linux
+          GOARCH: amd64
+```
+
+### Advanced Example
+
+Release for multiple OS and ARCH parallelly by matrix strategy with more option.
+
 ```yaml
 # .github/workflows/release.yaml
 # Maintainer: https://www.likexian.com
