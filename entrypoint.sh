@@ -25,26 +25,30 @@ if [[ -z $BINARY_NAME ]]; then
     BINARY_NAME=$(basename $(pwd))
 fi
 
-BINARY_EXT=""
-if [[ $GOOS == "windows" ]]; then
-    BINARY_EXT=".exe"
+if [[ $FILE_TAG == "true" ]]; then
+    FILE_TAG="-${TAG_NAME}"
+elif [[ $FILE_TAG == "false" ]]; then
+    FILE_TAG=""
 fi
 
-ZIP_NAME="${BINARY_NAME}-${GOOS}-${GOARCH}"
-if [[ $FILE_TAG == "true" ]]; then
-    ZIP_NAME="${BINARY_NAME}-${TAG_NAME}-${GOOS}-${GOARCH}"
+if [[ $GOOS == "windows" ]]; then
+    CONTENT_TYPE="zip"
+    BINARY_EXT=".exe"
+    ZIP_EXT=".zip"
+else
+    CONTENT_TYPE="gzip"
+    BINARY_EXT=""
+    ZIP_EXT=".tar.gz"
 fi
 
 GOOS=${GOOS} GOARCH=${GOARCH} go build ${BUILD_FLAGS} -ldflags "${LDFLAGS}" -o ${BINARY_NAME}${BINARY_EXT}
 
-if [[ $GOOS == "windows" ]]; then
-    CONTENT_TYPE="zip"
-    ZIP_NAME="${ZIP_NAME}.zip"
-    zip -9 -r ${ZIP_NAME} "${BINARY_NAME}${BINARY_EXT}"
+ZIP_NAME="${BINARY_NAME}${FILE_TAG}-${GOOS}-${GOARCH}${ZIP_EXT}"
+
+if [[ $CONTENT_TYPE == "zip" ]]; then
+    zip -v -r -9 ${ZIP_NAME} "${BINARY_NAME}${BINARY_EXT}"
 else
-    CONTENT_TYPE="gzip"
-    ZIP_NAME="${ZIP_NAME}.tar.gz"
-    tar zcf ${ZIP_NAME} "${BINARY_NAME}${BINARY_EXT}"
+    tar zcvf ${ZIP_NAME} "${BINARY_NAME}${BINARY_EXT}"
 fi
 
 CHECKSUM=$(sha256sum ${ZIP_NAME} | awk '{print $1}')
