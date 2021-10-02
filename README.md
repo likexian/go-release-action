@@ -8,7 +8,7 @@ Automate publishing Go build binary artifacts to GitHub releases through GitHub 
 
 ### Basic Example
 
-Release single artifact for linux amd64 with default option.
+Release single artifact for linux amd64 with default option when tag push.
 
 ```yaml
 # .github/workflows/release.yaml
@@ -18,8 +18,9 @@ Release single artifact for linux amd64 with default option.
 name: Release
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - '*'
 
 jobs:
   release:
@@ -37,7 +38,7 @@ jobs:
 
 ### Advanced Example
 
-Release for multiple OS and ARCH parallelly by matrix strategy with more option.
+Release for multiple OS and ARCH parallelly by matrix strategy with more option when release created.
 
 ```yaml
 # .github/workflows/release.yaml
