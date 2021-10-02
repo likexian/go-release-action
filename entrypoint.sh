@@ -21,18 +21,12 @@ if [[ -z $GOARCH ]]; then
     GOARCH="amd64"
 fi
 
-if [[ -z $BINARY_NAME ]]; then
+if [[ -z $BUILD_FILE ]]; then
     if [[ $GITHUB_WORKSPACE == $(pwd) ]]; then
-        BINARY_NAME=$(basename $GITHUB_REPOSITORY)
+        BUILD_FILE=$(basename $GITHUB_REPOSITORY)
     else
-        BINARY_NAME=$(basename $(pwd))
+        BUILD_FILE=$(basename $(pwd))
     fi
-fi
-
-if [[ $FILE_TAG == "true" ]]; then
-    FILE_TAG="-${TAG_NAME}"
-elif [[ $FILE_TAG == "false" ]]; then
-    FILE_TAG=""
 fi
 
 if [[ $GOOS == "windows" ]]; then
@@ -45,26 +39,38 @@ else
     ZIP_EXT=".tar.gz"
 fi
 
-GOOS=${GOOS} GOARCH=${GOARCH} go build ${BUILD_FLAGS} -ldflags "${LDFLAGS}" -o ${BINARY_NAME}${BINARY_EXT}
+PACK_DIR="$(pwd)/pack_$(date +%s)"
+mkdir -p $PACK_DIR
 
-ZIP_NAME="${BINARY_NAME}${FILE_TAG}-${GOOS}-${GOARCH}${ZIP_EXT}"
+GOOS=${GOOS} GOARCH=${GOARCH} go build ${BUILD_FLAGS} -ldflags "${BUILD_LDFLAGS}" -o $PACK_DIR/${BUILD_FILE}${BINARY_EXT}
 
-if [[ $CONTENT_TYPE == "zip" ]]; then
-    zip -v -r -9 ${ZIP_NAME} "${BINARY_NAME}${BINARY_EXT}"
-else
-    tar zcvf ${ZIP_NAME} "${BINARY_NAME}${BINARY_EXT}"
+if [[ -n $ZIP_EXTRA_FILES ]]; then
+    cd $GITHUB_WORKSPACE
+    cp -rf $ZIP_EXTRA_FILES $PACK_DIR
 fi
 
-CHECKSUM=$(sha256sum ${ZIP_NAME} | awk '{print $1}')
+if [[ -z $ZIP_FILE_NAME ]]; then
+    ZIP_FILE_NAME="${BUILD_FILE}-${TAG_NAME}-${GOOS}-${GOARCH}"
+fi
+ZIP_FILE_NAME="${ZIP_FILE_NAME}${ZIP_EXT}"
+
+cd $PACK_DIR
+if [[ $CONTENT_TYPE == "zip" ]]; then
+    shopt -s dotglob; zip -v -r -9 ${ZIP_FILE_NAME} *
+else
+    shopt -s dotglob; tar zcvf ${ZIP_FILE_NAME} *
+fi
+
+CHECKSUM=$(sha256sum ${ZIP_FILE_NAME} | awk '{print $1}')
 
 set +x
 
-curl --data-binary "@${ZIP_NAME}" \
+curl --data-binary "@${ZIP_FILE_NAME}" \
     -H "Content-Type: application/${CONTENT_TYPE}" \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    "${UPLOAD_URL}?name=${ZIP_NAME}"
+    "${UPLOAD_URL}?name=${ZIP_FILE_NAME}"
 
 curl --data "${CHECKSUM}" \
     -H "Content-Type: text/plain" \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    "${UPLOAD_URL}?name=${ZIP_NAME}.sha256sum.txt"
+    "${UPLOAD_URL}?name=${ZIP_FILE_NAME}.sha256"

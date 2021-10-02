@@ -70,10 +70,11 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           BUILD_DIR: cmd/example
+          BUILD_FILE: example
           BUILD_FLAGS: -v
-          LDFLAGS: -w -s
-          BINARY_NAME: example
-          FILE_TAG: true
+          BUILD_LDFLAGS: -w -s
+          ZIP_FILE_NAME: example-${{ matrix.goos }}-${{ matrix.goarch }}
+          ZIP_EXTRA_FILES: LICENSE README.md
 ```
 
 ## License
