@@ -22,7 +22,11 @@ if [[ -z $GOARCH ]]; then
 fi
 
 if [[ -z $BINARY_NAME ]]; then
-    BINARY_NAME=$(basename $(pwd))
+    if [[ $GITHUB_WORKSPACE == $(pwd) ]]; then
+        BINARY_NAME=$(basename $GITHUB_REPOSITORY)
+    else
+        BINARY_NAME=$(basename $(pwd))
+    fi
 fi
 
 if [[ $FILE_TAG == "true" ]]; then
