@@ -70,12 +70,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-          BUILD_DIR: cmd/example
-          BUILD_FILE: example
+          BUILD_IN_DIR: cmd/example
+          BUILD_BIN_DIR: bin
+          BUILD_BIN_FILE: example
           BUILD_FLAGS: -v
           BUILD_LDFLAGS: -w -s
-          ZIP_FILE_NAME: example-${{ matrix.goos }}-${{ matrix.goarch }}
-          ZIP_EXTRA_FILES: LICENSE README.md
+          PACK_ASSET_FILE: example-${{ matrix.goos }}-${{ matrix.goarch }}
+          PACK_INCLUDE_DIR: example
+          PACK_EXTRA_FILES: LICENSE README.md
 ```
 
 ## License

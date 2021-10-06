@@ -6,45 +6,47 @@
 
 set -ex
 
-TAG_NAME=$(jq -r .release.tag_name $GITHUB_EVENT_PATH)
-if [[ $TAG_NAME != null ]]; then
-    # event.type: release.created
-    UPLOAD_URL=$(jq -r .release.upload_url $GITHUB_EVENT_PATH)
-else
-    # event.type: tags.push
-    IS_CREATED=$(jq -r .created $GITHUB_EVENT_PATH)
-    if [[ $IS_CREATED != true ]]; then
-        echo "Skip: not tag created"
+tag_name=$(jq -r .release.tag_name $GITHUB_EVENT_PATH)
+if [[ $tag_name != null ]]; then
+    # event.type: release
+    action=$(jq -r .action $GITHUB_EVENT_PATH)
+    if [[ $action != "created" ]]; then
+        echo "Skip: only CREATED event is supported"
         exit 0
     fi
 
-    TAG_NAME=$(jq -r .ref $GITHUB_EVENT_PATH | xargs basename)
-    RELEASE_URL=$(jq -r .repository.releases_url $GITHUB_EVENT_PATH | sed -s 's/{\/id}//')
+    upload_url=$(jq -r .release.upload_url $GITHUB_EVENT_PATH)
+else
+    # event.type: push
+    is_created=$(jq -r .created $GITHUB_EVENT_PATH)
+    if [[ $is_created != true ]]; then
+        echo "Skip: only CREATED event is supported"
+        exit 0
+    fi
 
-    curl --data "{\"tag_name\": \"${TAG_NAME}\", \"name\": \"${TAG_NAME}\"}" \
+    tag_name=$(jq -r .ref $GITHUB_EVENT_PATH | xargs basename)
+    releases_url=$(jq -r .repository.releases_url $GITHUB_EVENT_PATH | sed -s 's/{\/id}//')
+
+    curl --data "{\"tag_name\": \"${tag_name}\", \"name\": \"${tag_name}\"}" \
         -H "Content-Type: application/json" \
         -H "Accept: application/vnd.github.v3+json" \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
         -o $GITHUB_EVENT_PATH \
-        $RELEASE_URL
+        $releases_url
 
-    UPLOAD_URL=$(jq -r .upload_url $GITHUB_EVENT_PATH)
+    upload_url=$(jq -r .upload_url $GITHUB_EVENT_PATH)
 fi
 
-TAG_NAME=$(echo $TAG_NAME | sed -s 's/v//')
-if [[ $TAG_NAME == null ]]; then
-    echo "Error: TAG_NAME is missing"
+tag_name=$(echo $tag_name | sed -s 's/v//')
+if [[ $tag_name == null ]]; then
+    echo "Error: tag_name is missing"
     exit 1
 fi
 
-UPLOAD_URL=$(echo $UPLOAD_URL | sed -s 's/{?name,label}//')
-if [[ $UPLOAD_URL == null ]]; then
-    echo "Error: UPLOAD_URL is missing"
+upload_url=$(echo $upload_url | sed -s 's/{?name,label}//')
+if [[ $upload_url == null ]]; then
+    echo "Error: upload_url is missing"
     exit 1
-fi
-
-if [[ -n $BUILD_DIR ]]; then
-    cd $BUILD_DIR
 fi
 
 if [[ -z $GOOS ]]; then
@@ -55,54 +57,69 @@ if [[ -z $GOARCH ]]; then
     GOARCH="amd64"
 fi
 
-if [[ -z $BUILD_FILE ]]; then
-    if [[ $GITHUB_WORKSPACE == $(pwd) ]]; then
-        BUILD_FILE=$(basename $GITHUB_REPOSITORY)
-    else
-        BUILD_FILE=$(basename $(pwd))
-    fi
+project_name=$(basename $GITHUB_REPOSITORY)
+if [[ -n $BUILD_IN_DIR ]]; then
+    project_name=$(basename $BUILD_IN_DIR)
+fi
+
+if [[ -z $BUILD_BIN_FILE ]]; then
+    BUILD_BIN_FILE=$project_name
 fi
 
 if [[ $GOOS == "windows" ]]; then
-    CONTENT_TYPE="zip"
-    BINARY_EXT=".exe"
-    ZIP_EXT=".zip"
+    content_type="zip"
+    binary_ext=".exe"
+    pack_ext=".zip"
 else
-    CONTENT_TYPE="gzip"
-    BINARY_EXT=""
-    ZIP_EXT=".tar.gz"
+    content_type="gzip"
+    binary_ext=""
+    pack_ext=".tar.gz"
 fi
 
-PACK_DIR="$(pwd)/pack_$(date +%s)"
-mkdir -p $PACK_DIR
+pack_dir="$GITHUB_WORKSPACE/$BUILD_IN_DIR/pack_$(date +%s)"
+mkdir -p $pack_dir
 
-GOOS=${GOOS} GOARCH=${GOARCH} go build ${BUILD_FLAGS} -ldflags "${BUILD_LDFLAGS}" -o $PACK_DIR/${BUILD_FILE}${BINARY_EXT}
-
-if [[ -n $ZIP_EXTRA_FILES ]]; then
-    cd $GITHUB_WORKSPACE
-    cp -rf $ZIP_EXTRA_FILES $PACK_DIR
+if [[ -n $PACK_INCLUDE_DIR ]]; then
+    mkdir -p $pack_dir/$PACK_INCLUDE_DIR
 fi
 
-if [[ -z $ZIP_FILE_NAME ]]; then
-    ZIP_FILE_NAME="${BUILD_FILE}-${TAG_NAME}-${GOOS}-${GOARCH}"
+if [[ -n $BUILD_BIN_DIR ]]; then
+    mkdir -p $pack_dir/$PACK_INCLUDE_DIR/$BUILD_BIN_DIR
 fi
-ZIP_FILE_NAME="${ZIP_FILE_NAME}${ZIP_EXT}"
 
-cd $PACK_DIR
-if [[ $CONTENT_TYPE == "zip" ]]; then
-    shopt -s dotglob; zip -v -r -9 ${ZIP_FILE_NAME} *
+if [[ -n $PACK_EXTRA_FILES ]]; then
+    cp -rf $PACK_EXTRA_FILES $pack_dir/$PACK_INCLUDE_DIR
+fi
+
+if [[ -z $PACK_ASSET_FILE ]]; then
+    PACK_ASSET_FILE="${BUILD_BIN_FILE}-${tag_name}-${GOOS}-${GOARCH}"
+fi
+PACK_ASSET_FILE="${PACK_ASSET_FILE}${pack_ext}"
+
+if [[ -n $BUILD_IN_DIR ]]; then
+    cd $BUILD_IN_DIR
+fi
+
+GOOS=${GOOS} GOARCH=${GOARCH} \
+    go build ${BUILD_FLAGS} -ldflags "${BUILD_LDFLAGS}" \
+    -o $pack_dir/$PACK_INCLUDE_DIR/$BUILD_BIN_DIR/${BUILD_BIN_FILE}${binary_ext}
+
+cd $pack_dir
+
+if [[ $content_type == "zip" ]]; then
+    shopt -s dotglob; zip -v -r -9 ${PACK_ASSET_FILE} *
 else
-    shopt -s dotglob; tar zcvf ${ZIP_FILE_NAME} *
+    shopt -s dotglob; tar zcvf ${PACK_ASSET_FILE} *
 fi
 
-CHECKSUM=$(sha256sum ${ZIP_FILE_NAME} | awk '{print $1}')
+checksum=$(sha256sum ${PACK_ASSET_FILE} | awk '{print $1}')
 
-curl --data-binary "@${ZIP_FILE_NAME}" \
-    -H "Content-Type: application/${CONTENT_TYPE}" \
+curl --data-binary "@${PACK_ASSET_FILE}" \
+    -H "Content-Type: application/${content_type}" \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    "${UPLOAD_URL}?name=${ZIP_FILE_NAME}"
+    "${upload_url}?name=${PACK_ASSET_FILE}"
 
-curl --data "${CHECKSUM}" \
+curl --data "${checksum}" \
     -H "Content-Type: text/plain" \
     -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    "${UPLOAD_URL}?name=${ZIP_FILE_NAME}.sha256"
+    "${upload_url}?name=${PACK_ASSET_FILE}.sha256"
