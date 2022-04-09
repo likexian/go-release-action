@@ -1,4 +1,4 @@
-FROM golang:1.17-alpine
+FROM golang:1.18-alpine
 
 LABEL "com.github.actions.name"="Go Release Action"
 LABEL "com.github.actions.description"="Automate publishing Go build binary artifacts to GitHub releases through GitHub Actions."
