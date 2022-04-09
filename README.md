@@ -82,7 +82,7 @@ jobs:
 
 ## License
 
-Copyright 2021 [Li Kexian](https://www.likexian.com/)
+Copyright 2021-2022 [Li Kexian](https://www.likexian.com/)
 
 Licensed under the Apache License 2.0
 
