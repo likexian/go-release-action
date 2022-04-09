@@ -4,7 +4,7 @@
 
 Automate publishing Go build binary artifacts to GitHub releases through GitHub Actions.
 
-## Example
+## Usage
 
 ### Basic Example
 
@@ -35,6 +35,24 @@ jobs:
           GOOS: linux
           GOARCH: amd64
 ```
+
+### Release Arguments
+
+We use `system environment` to set release arguments, as `env` setting in Github Action.
+
+| Argument | Required | Description |
+| -------- | -------- | ----------- |
+| GITHUB_TOKEN | Required | `GITHUB_TOKEN` for uploading releases to Github assets. |
+| GOOS | Optional | `GOOS` for go build, one of `darwin`, `linux`, `windows`, `freebsd` and so on. |
+| GOARCH | Optional | `GOARCH` for go build, one of `amd64`, `386`, `arm64`, `arm` and so on. |
+| BUILD_FLAGS | Optional | `flags` for running go build, `-v` for example. |
+| BUILD_LDFLAGS | Optional | `ldflags` for running go build, `-w -s` for example. |
+| BUILD_IN_DIR | Optional | Directory to run the go build. |
+| BUILD_BIN_DIR | Optional | Binary target will include in this folder. |
+| BUILD_BIN_FILE | Optional | Binary target file name for go build. |
+| PACK_ASSET_FILE | Optional | Package name for uploading to Github assets. |
+| PACK_INCLUDE_DIR | Optional | Files will be packed in this folder. |
+| PACK_EXTRA_FILES | Optional | Extra files to pack, for example `LICENSE` and `README.md`. |
 
 ### Advanced Example
 
