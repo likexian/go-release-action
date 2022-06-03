@@ -98,6 +98,10 @@ jobs:
           PACK_EXTRA_FILES: LICENSE README.md
 ```
 
+### More Example
+
+Please refer to [go-release-action-example](https://github.com/likexian/go-release-action-example)
+
 ## License
 
 Copyright 2021-2022 [Li Kexian](https://www.likexian.com/)
