@@ -6,6 +6,8 @@
 
 set -ex
 
+git config --global --add safe.directory $GITHUB_WORKSPACE
+
 tag_name=$(jq -r .release.tag_name $GITHUB_EVENT_PATH)
 if [[ $tag_name != null ]]; then
     # event.type: release
