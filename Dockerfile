@@ -7,7 +7,7 @@ LABEL "com.github.actions.color"="blue"
 
 LABEL name="Go Release Action"
 LABEL description="Automate publishing Go build binary artifacts to GitHub releases through GitHub Actions."
-LABEL version="v0.1.0"
+LABEL version="v0.2.0"
 LABEL repository="https://github.com/likexian/go-release-action"
 LABEL homepage="https://github.com/likexian/go-release-action"
 LABEL maintainer="https://www.likexian.com"

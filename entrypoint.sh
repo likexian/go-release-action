@@ -29,12 +29,16 @@ else
     tag_name=$(jq -r .ref $GITHUB_EVENT_PATH | xargs basename)
     releases_url=$(jq -r .repository.releases_url $GITHUB_EVENT_PATH | sed -s 's/{\/id}//')
 
-    curl --data "{\"tag_name\": \"${tag_name}\", \"name\": \"${tag_name}\"}" \
+    curl -o /dev/null \
         -H "Content-Type: application/json" \
         -H "Accept: application/vnd.github.v3+json" \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        -o $GITHUB_EVENT_PATH \
+        --data "{\"tag_name\": \"${tag_name}\", \"name\": \"${tag_name}\"}" \
         $releases_url
+
+    curl -o ${GITHUB_EVENT_PATH} \
+        -H "Accept: application/vnd.github.v3+json" \
+        ${releases_url}/tags/${tag_name}
 
     upload_url=$(jq -r .upload_url $GITHUB_EVENT_PATH)
 fi

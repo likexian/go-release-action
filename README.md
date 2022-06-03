@@ -29,7 +29,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Release code
-        uses: likexian/go-release-action@v0.1.0
+        uses: likexian/go-release-action@v0.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOS: linux
@@ -83,7 +83,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Release code
-        uses: likexian/go-release-action@v0.1.0
+        uses: likexian/go-release-action@v0.2.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOS: ${{ matrix.goos }}
