@@ -38,10 +38,13 @@ else
 
     curl -o ${GITHUB_EVENT_PATH} \
         -H "Accept: application/vnd.github.v3+json" \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
         ${releases_url}/tags/${tag_name}
 
     upload_url=$(jq -r .upload_url $GITHUB_EVENT_PATH)
 fi
+
+echo "tag_name=${tag_name}" >> $GITHUB_ENV
 
 tag_name=$(echo $tag_name | sed -s 's/v//')
 if [[ $tag_name == null ]]; then
