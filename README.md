@@ -27,9 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Release code
-        uses: likexian/go-release-action@v0.3.0
+        uses: likexian/go-release-action@v0.4.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOS: linux
@@ -81,9 +81,9 @@ jobs:
             goarch: "386"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Release code
-        uses: likexian/go-release-action@v0.3.0
+        uses: likexian/go-release-action@v0.4.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOS: ${{ matrix.goos }}
