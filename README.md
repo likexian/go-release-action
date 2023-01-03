@@ -29,7 +29,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Release code
-        uses: likexian/go-release-action@v0.4.0
+        uses: likexian/go-release-action@v0.5.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOS: linux
@@ -83,7 +83,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Release code
-        uses: likexian/go-release-action@v0.4.0
+        uses: likexian/go-release-action@v0.5.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOS: ${{ matrix.goos }}
@@ -104,7 +104,7 @@ Please refer to [go-release-action-example](https://github.com/likexian/go-relea
 
 ## License
 
-Copyright 2021-2022 [Li Kexian](https://www.likexian.com/)
+Copyright 2021-2023 [Li Kexian](https://www.likexian.com/)
 
 Licensed under the Apache License 2.0
 
