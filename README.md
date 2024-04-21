@@ -104,7 +104,7 @@ Please refer to [go-release-action-example](https://github.com/likexian/go-relea
 
 ## License
 
-Copyright 2021-2023 [Li Kexian](https://www.likexian.com/)
+Copyright 2021-2024 [Li Kexian](https://www.likexian.com/)
 
 Licensed under the Apache License 2.0
 
