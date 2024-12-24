@@ -6,7 +6,7 @@ Automate publishing Go build binary artifacts to GitHub releases through GitHub 
 
 ## Usage
 
-Your secret token might not have permissions to upload assets.
+Your secret token might not have permissions to upload assets. In that case do not forget to add `permissions` to your workflow file (see examples).
 
 ### Basic Example
 
