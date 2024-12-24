@@ -1,4 +1,4 @@
-FROM golang:1.22
+FROM golang:1.23
 
 LABEL "com.github.actions.name"="Go Release Action"
 LABEL "com.github.actions.description"="Automate publishing Go build binary artifacts to GitHub releases through GitHub Actions."
