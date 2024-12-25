@@ -6,6 +6,8 @@ Automate publishing Go build binary artifacts to GitHub releases through GitHub 
 
 ## Usage
 
+Your secret token might not have permissions to upload assets. In that case do not forget to add `permissions` to your workflow file (see examples).
+
 ### Basic Example
 
 Release single artifact for linux amd64 with default option when tag push.
@@ -22,6 +24,9 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -29,7 +34,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Release code
-        uses: likexian/go-release-action@v0.7.0
+        uses: likexian/go-release-action@v0.8.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOS: linux
@@ -69,6 +74,9 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -83,7 +91,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Release code
-        uses: likexian/go-release-action@v0.7.0
+        uses: likexian/go-release-action@v0.8.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOS: ${{ matrix.goos }}
