@@ -109,6 +109,12 @@ if [[ -n $BUILD_IN_DIR ]]; then
     cd $BUILD_IN_DIR
 fi
 
+if [[ $BUILD_STATIC == "true" ]]; then
+    export CGO_ENABLED=0
+    BUILD_FLAGS="${BUILD_FLAGS} -a -tags netgo"
+    BUILD_LDFLAGS="${BUILD_LDFLAGS} -extldflags '-static'"
+fi
+
 GOOS=${GOOS} GOARCH=${GOARCH} \
     go build ${BUILD_FLAGS} -ldflags "${BUILD_LDFLAGS}" \
     -o $pack_dir/$PACK_INCLUDE_DIR/$BUILD_BIN_DIR/${BUILD_BIN_FILE}${binary_ext}

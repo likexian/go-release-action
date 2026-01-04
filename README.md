@@ -32,9 +32,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Release code
-        uses: likexian/go-release-action@v0.8.0
+        uses: likexian/go-release-action@v0.9.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOS: linux
@@ -52,6 +52,7 @@ We use `system environment` to set release arguments, as `env` setting in Github
 | GOARCH | Optional | `GOARCH` for go build, one of `amd64`, `386`, `arm64`, `arm` and so on. |
 | BUILD_FLAGS | Optional | `flags` for running go build, `-v` for example. |
 | BUILD_LDFLAGS | Optional | `ldflags` for running go build, `-w -s` for example. |
+| BUILD_STATIC | Optional | Enable static build by setting `CGO_ENABLED=0`, adding `-a -tags netgo` flags and `-extldflags '-static'` ldflags. |
 | BUILD_IN_DIR | Optional | Directory to run the go build. |
 | BUILD_BIN_DIR | Optional | Binary target will include in this folder. |
 | BUILD_BIN_FILE | Optional | Binary target file name for go build. |
@@ -89,9 +90,9 @@ jobs:
             goarch: "386"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Release code
-        uses: likexian/go-release-action@v0.8.0
+        uses: likexian/go-release-action@v0.9.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOS: ${{ matrix.goos }}
@@ -101,6 +102,7 @@ jobs:
           BUILD_BIN_FILE: example
           BUILD_FLAGS: -v
           BUILD_LDFLAGS: -w -s
+          BUILD_STATIC: true
           PACK_ASSET_FILE: example-${{ matrix.goos }}-${{ matrix.goarch }}
           PACK_INCLUDE_DIR: example
           PACK_EXTRA_FILES: LICENSE README.md
